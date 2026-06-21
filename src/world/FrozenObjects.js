@@ -35,10 +35,13 @@ export default class FrozenObjects {
 
       const iceMat = createIceMaterial({
         color: '#c9ced8',
-        opacity: 0.62, // translucent frosted shell (cheap — no transmission)
-        roughness: 0.4,
-        clearcoat: 0.5,
-        frost: 0.35 + Math.random() * 0.25
+        transmission: 0.92, // true glass refraction on the showcased objects
+        thickness: 2.6,
+        roughness: 0.22,
+        clearcoat: 0.6,
+        attenuation: '#7d8596',
+        attenuationDistance: 5,
+        frost: 0.3 + Math.random() * 0.25
       });
 
       const shell = new THREE.Mesh(this._roundBox(5.5, 5.5, 5.5), iceMat);

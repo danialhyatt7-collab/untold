@@ -1,21 +1,30 @@
 import * as THREE from 'three';
 
 /**
- * Frosted ice — a cheap MeshStandardMaterial (no transmission pass, no
- * clearcoat) plus a noise field injected through onBeforeCompile that breaks
- * the surface into frost, internal cloud and micro-cracks. Pass `opacity` < 1
- * for a translucent block you can see through faintly.
+ * Frosted ice — a rich MeshPhysicalMaterial (clearcoat for that wet,
+ * light-catching ice sheen) plus a noise field injected through
+ * onBeforeCompile that breaks the surface into frost, internal cloud and
+ * micro-cracks. Pass `opacity` < 1 for a translucent block you can see
+ * through faintly, or `transmission` > 0 for true glass refraction.
  * `material.userData.uniforms.uTime` drives a slow shimmer.
  */
 export function createIceMaterial(opts = {}) {
+  const transmission = opts.transmission ?? 0;
   const opacity = opts.opacity ?? 1;
-  const mat = new THREE.MeshStandardMaterial({
+  const mat = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color(opts.color || '#cfd4de'),
     metalness: 0,
     roughness: opts.roughness ?? 0.55,
+    transmission,
+    thickness: opts.thickness ?? 2.4,
+    ior: 1.31, // ice
+    attenuationColor: new THREE.Color(opts.attenuation || '#7d8596'),
+    attenuationDistance: opts.attenuationDistance ?? 6,
+    clearcoat: opts.clearcoat ?? 0.45,
+    clearcoatRoughness: 0.3,
     envMapIntensity: opts.envMapIntensity ?? 1.0,
     opacity,
-    transparent: opacity < 1,
+    transparent: transmission > 0 || opacity < 1,
     side: THREE.FrontSide
   });
 

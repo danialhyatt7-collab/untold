@@ -15,8 +15,8 @@ export function initTransitions() {
     return t * t * (3 - 2 * t);
   };
 
-  const MAX = 0.85; // peak whiteness
-  const ZONE = 0.2; // fraction of viewport over which a transition happens (snappy)
+  const MAX = 1.0; // full white dissolve at the seam — sections merge, no visible scroll
+  const ZONE = 0.3; // fraction of viewport over which a transition happens
 
   let current = 0;
   const update = () => {
