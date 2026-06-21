@@ -14,13 +14,12 @@ import FrozenObjects from '../world/FrozenObjects.js';
 import Portal from '../world/Portal.js';
 import { buildEnvironment } from '../world/Environment.js';
 
-import Scroll from './Scroll.js';
+import Slides from './Slides.js';
 import Loader from './Loader.js';
 import { injectContent } from '../ui/content.js';
 import { initInteractions, showChrome } from '../ui/interactions.js';
 import { mountMedia } from '../ui/media.js';
 import { initHud } from '../ui/hud.js';
-import { initTransitions } from '../ui/transitions.js';
 
 export default class App {
   constructor() {
@@ -114,8 +113,7 @@ export default class App {
 
   _initContent() {
     injectContent(document.getElementById('content'));
-    this.scroll = new Scroll();
-    this.scroll.stop();
+    this.slides = new Slides();
     this.loader = new Loader();
   }
 
@@ -154,10 +152,10 @@ export default class App {
     // seamless camera morph from loader framing into the flight
     gsap.to(this.intro, { v: 1, duration: 2.6, ease: 'power2.inOut' });
 
-    this.scroll.start();
+    this.slides.enable();
+    this.slides.show();
     initInteractions();
     initHud();
-    initTransitions();
     showChrome();
     mountMedia(); // wire any Higgsfield-generated media into the full-bleed panels
   }
@@ -201,8 +199,7 @@ export default class App {
       if (this.hidden) return;
       const t = this.clock.getElapsedTime();
 
-      this.scroll.raf(timeMs);
-      this.rig.update(this.scroll.progress, t, this.intro.v);
+      this.rig.update(this.slides.progress, t, this.intro.v);
       this._renderWorld(t);
       this._sampleFps();
     };

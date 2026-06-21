@@ -90,20 +90,21 @@ export function injectContent(root) {
     </section>
 
     <section class="outro" id="enter">
-      <p class="outro__sub reveal">The thaw begins with you</p>
-      <h2 class="outro__word reveal">untold</h2>
-      <a class="nav__cta reveal" href="mailto:hello@untold.studio">Enter the archive <span>↘</span></a>
-      <svg class="constellation reveal" viewBox="0 0 240 120" aria-hidden="true">
-        <polyline points="20,90 60,40 110,70 150,30 200,80 220,50" />
-        <circle cx="20" cy="90" r="2"/><circle cx="60" cy="40" r="2"/><circle cx="110" cy="70" r="2"/>
-        <circle cx="150" cy="30" r="2"/><circle cx="200" cy="80" r="2"/><circle cx="220" cy="50" r="2"/>
-      </svg>
+      <div class="outro__main">
+        <p class="outro__sub reveal">The thaw begins with you</p>
+        <h2 class="outro__word reveal">untold</h2>
+        <a class="nav__cta reveal" href="mailto:hello@untold.studio">Enter the archive <span>↘</span></a>
+        <svg class="constellation reveal" viewBox="0 0 240 120" aria-hidden="true">
+          <polyline points="20,90 60,40 110,70 150,30 200,80 220,50" />
+          <circle cx="20" cy="90" r="2"/><circle cx="60" cy="40" r="2"/><circle cx="110" cy="70" r="2"/>
+          <circle cx="150" cy="30" r="2"/><circle cx="200" cy="80" r="2"/><circle cx="220" cy="50" r="2"/>
+        </svg>
+      </div>
+      <footer class="footer">
+        <span>untold® — Monolith Exp. 2026</span>
+        <span>// Frozen in real-time · Three.js</span>
+        <span>71.2°N / Perpetual winter</span>
+      </footer>
     </section>
-
-    <footer class="footer">
-      <span>untold® — Monolith Exp. 2026</span>
-      <span>// Frozen in real-time · Three.js</span>
-      <span>71.2°N / Perpetual winter</span>
-    </footer>
   `;
 }
