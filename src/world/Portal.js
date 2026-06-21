@@ -19,7 +19,7 @@ export default class Portal {
         opacity: 0.9
       });
       const radius = 9 + (i % 2) * 2;
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.06, 16, 160), ringMat);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.06, 10, 90), ringMat);
       ring.position.set(0, y, 0);
       ring.rotation.x = Math.PI / 2; // lie flat so the flight passes through it
       ring.userData = { mat: ringMat, baseY: y, phase: i };
@@ -36,7 +36,7 @@ export default class Portal {
     });
 
     // drifting constellation node field around the column
-    const N = 90;
+    const N = 44;
     const pts = new Float32Array(N * 3);
     for (let i = 0; i < N; i++) {
       const a = Math.random() * Math.PI * 2;

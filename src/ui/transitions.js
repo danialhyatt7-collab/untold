@@ -15,8 +15,8 @@ export function initTransitions() {
     return t * t * (3 - 2 * t);
   };
 
-  const MAX = 0.92; // peak whiteness
-  const ZONE = 0.34; // fraction of viewport over which a transition happens
+  const MAX = 0.85; // peak whiteness
+  const ZONE = 0.2; // fraction of viewport over which a transition happens (snappy)
 
   let current = 0;
   const update = () => {

@@ -1,28 +1,31 @@
 import * as THREE from 'three';
 
 /**
- * Physically-based transmissive ice. Real refraction (transmission + ior +
- * thickness) plus a noise field injected through onBeforeCompile that breaks
- * up the surface into frost, internal cloud and micro-cracks so every block
- * refracts a little differently. `material.userData.uniforms.uTime` drives
- * a slow shimmer.
+ * Frosted ice. Uses a standard PBR surface (no transmission render pass, so
+ * it's cheap) plus a noise field injected through onBeforeCompile that breaks
+ * the surface into frost, internal cloud and micro-cracks. Pass `opacity` < 1
+ * for a translucent block you can see through faintly. `transmission` is still
+ * supported but off by default — it's the expensive path.
+ * `material.userData.uniforms.uTime` drives a slow shimmer.
  */
 export function createIceMaterial(opts = {}) {
-  const transmission = opts.transmission ?? 1;
+  const transmission = opts.transmission ?? 0;
+  const opacity = opts.opacity ?? 1;
   const mat = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color(opts.color || '#cfd4de'),
     metalness: 0,
-    roughness: opts.roughness ?? 0.08,
+    roughness: opts.roughness ?? 0.55,
     transmission,
     thickness: opts.thickness ?? 2.4,
     ior: 1.31, // ice
     attenuationColor: new THREE.Color(opts.attenuation || '#7d8596'),
     attenuationDistance: opts.attenuationDistance ?? 6,
-    clearcoat: opts.clearcoat ?? 0.6,
-    clearcoatRoughness: 0.25,
-    envMapIntensity: 1.1,
-    transparent: transmission > 0,
-    side: transmission > 0 ? THREE.DoubleSide : THREE.FrontSide
+    clearcoat: opts.clearcoat ?? 0.4,
+    clearcoatRoughness: 0.3,
+    envMapIntensity: opts.envMapIntensity ?? 1.0,
+    opacity,
+    transparent: transmission > 0 || opacity < 1,
+    side: THREE.FrontSide
   });
 
   const uniforms = { uTime: { value: 0 }, uFrost: { value: opts.frost ?? 0.5 } };

@@ -10,11 +10,11 @@ export default class Atmosphere {
   constructor(scene) {
     this.uniforms = {
       uTime: { value: 0 },
-      uTop: { value: new THREE.Color('#23272f') },
-      uBottom: { value: new THREE.Color('#454c5e') }
+      uTop: { value: new THREE.Color('#4e5563') },
+      uBottom: { value: new THREE.Color('#878d9a') }
     };
 
-    const geo = new THREE.SphereGeometry(260, 64, 64);
+    const geo = new THREE.SphereGeometry(260, 32, 24);
     const mat = new THREE.ShaderMaterial({
       uniforms: this.uniforms,
       vertexShader,

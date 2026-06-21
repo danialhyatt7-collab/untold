@@ -44,15 +44,15 @@ export default class App {
       powerPreference: 'high-performance'
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    this.renderer.toneMappingExposure = 0.95;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
   }
 
   _initScene() {
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2('#2a2f39', 0.012);
+    this.scene.fog = new THREE.FogExp2('#828892', 0.011);
 
     this.rig = new CameraRig();
     this.scene.environment = buildEnvironment(this.renderer);
@@ -71,12 +71,14 @@ export default class App {
 
     this.bloom = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.55, // strength
-      0.85, // radius
-      0.82 // threshold — only the bright ice highlights bloom
+      0.5, // strength
+      0.8, // radius
+      0.95 // threshold — only the seam + portal rings bloom, not the bright fog
     );
     this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
+    // run the whole post pipeline (incl. bloom) at 1x — big perf win, still crisp
+    this.composer.setPixelRatio(1);
   }
 
   _initContent() {
@@ -158,7 +160,8 @@ export default class App {
     this.rig.resize();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.composer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    this.composer.setPixelRatio(1);
   }
 
   start() {

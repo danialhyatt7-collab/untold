@@ -35,8 +35,9 @@ export default class FrozenObjects {
 
       const iceMat = createIceMaterial({
         color: '#c9ced8',
-        thickness: 3.4,
-        attenuation: '#6b7184',
+        opacity: 0.62, // translucent frosted shell (cheap — no transmission)
+        roughness: 0.4,
+        clearcoat: 0.5,
         frost: 0.35 + Math.random() * 0.25
       });
 

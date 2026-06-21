@@ -13,19 +13,16 @@ export default class IceMonolith {
 
     this.material = createIceMaterial({
       color: '#b6bac5', // uniform soft silver-grey, matching the palette
-      transmission: 0.16, // frosted, mostly opaque like weathered stone-ice
-      roughness: 0.7,
-      thickness: 4,
-      attenuation: '#7d8596',
-      attenuationDistance: 9,
-      clearcoat: 0.28,
+      roughness: 0.72, // frosted weathered stone-ice (opaque, cheap)
+      clearcoat: 0.22,
+      envMapIntensity: 0.9,
       frost: 0.5 // less white snow-caking -> even matte grey
     });
 
     // ---- stacked tiers: chunky rounded pillow-blocks, 2 columns wide ----
     const top = 12;
-    const tierH = 9.5; // squat / chunky, roughly cube proportioned
-    const tiers = 18; // reaches well below the descent
+    const tierH = 11; // squat / chunky, roughly cube proportioned
+    const tiers = 11; // reaches well below the descent
     const gap = 0.55; // central glowing seam gap
     const halfW = 5.2;
 
@@ -75,7 +72,7 @@ export default class IceMonolith {
 
   /** smooth, tumbled pillow-block: rounded cube with gentle frost undulation. */
   _pillowBlock(w, h, d, seed) {
-    const geo = new THREE.BoxGeometry(w, h, d, 8, 8, 8);
+    const geo = new THREE.BoxGeometry(w, h, d, 4, 5, 4);
     const pos = geo.attributes.position;
     const v = new THREE.Vector3();
     for (let i = 0; i < pos.count; i++) {
