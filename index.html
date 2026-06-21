@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#383e4e" />
+    <title>untold</title>
+    <meta name="description" content="untold — a mystical winter world, frozen in time. Stories preserved in ice." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- ============ LOADER ============ -->
+    <div class="loader" id="loader">
+      <div class="loader__inner">
+        <div class="loader__mark" id="loaderMark">
+          <span class="loader__word">untold</span>
+        </div>
+        <div class="loader__meta">
+          <span class="loader__tag" id="loaderTag">entering the frozen world</span>
+          <span class="loader__count"><span id="loaderCount">0</span><i>%</i></span>
+        </div>
+        <div class="loader__bar"><span id="loaderBar"></span></div>
+      </div>
+    </div>
+
+    <!-- ============ WEBGL CANVAS ============ -->
+    <canvas id="webgl"></canvas>
+
+    <!-- ============ SCROLL / DOM OVERLAY ============ -->
+    <div class="scroll" id="scroll">
+      <header class="nav" id="nav">
+        <a class="nav__brand" href="#top">untold<i>®</i></a>
+        <nav class="nav__links">
+          <a href="#world">World</a>
+          <a href="#archive">Archive</a>
+          <a href="#manifest">Manifest</a>
+        </nav>
+        <a class="nav__cta" href="#enter">Enter <span>↘</span></a>
+      </header>
+
+      <!-- content sections are injected by JS to stay in sync with scene depth -->
+      <main id="content"></main>
+
+      <div class="progress" id="progress"><span id="progressFill"></span></div>
+      <div class="cursor" id="cursor"></div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

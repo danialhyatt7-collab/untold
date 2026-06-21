@@ -1,0 +1,19 @@
+{
+  "monolith": {
+    "poster": "monolith.webp",
+    "video": "monolith.mp4",
+    "caption": "untold — monolith / the seam"
+  },
+  "aurora": {
+    "poster": "aurora.webp",
+    "caption": "Last transmission — 71.2°N"
+  },
+  "tunnel": {
+    "poster": "tunnel.webp",
+    "caption": "Chamber — descent"
+  },
+  "crystal": {
+    "poster": "crystal.webp",
+    "caption": "Specimen 003 / fracture"
+  }
+}
