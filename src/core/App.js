@@ -77,8 +77,39 @@ export default class App {
     );
     this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
-    // run the whole post pipeline (incl. bloom) at 1x — big perf win, still crisp
-    this.composer.setPixelRatio(1);
+
+    // ---- adaptive quality: steps down resolution (then bloom) if FPS dips ----
+    this.qLevels = [
+      { pr: 1.0, bloom: true },
+      { pr: 0.8, bloom: true },
+      { pr: 0.66, bloom: true },
+      { pr: 0.6, bloom: false }
+    ];
+    this.quality = 0;
+    this._frames = 0;
+    this._fpsT = performance.now();
+    this._applyQuality();
+  }
+
+  _applyQuality() {
+    const q = this.qLevels[this.quality];
+    this.composer.setPixelRatio(Math.min(window.devicePixelRatio, q.pr));
+    this.bloom.enabled = q.bloom;
+  }
+
+  _sampleFps() {
+    this._frames++;
+    const now = performance.now();
+    const dt = now - this._fpsT;
+    if (dt < 1000) return;
+    const fps = (this._frames * 1000) / dt;
+    this._frames = 0;
+    this._fpsT = now;
+    // only step down, with headroom, to avoid flapping
+    if (fps < 48 && this.quality < this.qLevels.length - 1) {
+      this.quality++;
+      this._applyQuality();
+    }
   }
 
   _initContent() {
@@ -161,7 +192,7 @@ export default class App {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.composer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    this.composer.setPixelRatio(1);
+    this._applyQuality();
   }
 
   start() {
@@ -173,6 +204,7 @@ export default class App {
       this.scroll.raf(timeMs);
       this.rig.update(this.scroll.progress, t, this.intro.v);
       this._renderWorld(t);
+      this._sampleFps();
     };
     requestAnimationFrame(loop);
   }

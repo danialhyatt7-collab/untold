@@ -7,7 +7,7 @@ import fragmentShader from '../shaders/snow.frag';
  * motes) that fill the full descent column so depth always reads.
  */
 export default class Snow {
-  constructor(scene, { count = 1200, depth = 200, size = 26, color = '#d7dae1' } = {}) {
+  constructor(scene, { count = 850, depth = 200, size = 26, color = '#d7dae1' } = {}) {
     this.depth = depth;
     const positions = new Float32Array(count * 3);
     const scales = new Float32Array(count);
