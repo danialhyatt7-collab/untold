@@ -3,15 +3,27 @@
  * Kept independent of the WebGL loop.
  */
 export function initInteractions() {
-  // ---- custom cursor ----
+  // ---- custom cursor (1:1 follow, GPU-composited, no rAF / no trailing) ----
   const cursor = document.getElementById('cursor');
-  const pos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-  const target = { ...pos };
-
-  window.addEventListener('pointermove', (e) => {
-    target.x = e.clientX;
-    target.y = e.clientY;
-  });
+  let queued = false;
+  let cx = window.innerWidth / 2;
+  let cy = window.innerHeight / 2;
+  const place = () => {
+    queued = false;
+    cursor.style.transform = `translate3d(${cx}px, ${cy}px, 0) translate(-50%, -50%)`;
+  };
+  window.addEventListener(
+    'pointermove',
+    (e) => {
+      cx = e.clientX;
+      cy = e.clientY;
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(place);
+      }
+    },
+    { passive: true }
+  );
 
   const hoverables = 'a, .archive__row, [data-media], button';
   document.addEventListener('pointerover', (e) => {
@@ -20,14 +32,6 @@ export function initInteractions() {
   document.addEventListener('pointerout', (e) => {
     if (e.target.closest(hoverables)) cursor.classList.remove('is-hover');
   });
-
-  const loop = () => {
-    pos.x += (target.x - pos.x) * 0.18;
-    pos.y += (target.y - pos.y) * 0.18;
-    cursor.style.transform = `translate(${pos.x}px, ${pos.y}px) translate(-50%, -50%)`;
-    requestAnimationFrame(loop);
-  };
-  loop();
 
   // ---- scroll reveals ----
   const io = new IntersectionObserver(

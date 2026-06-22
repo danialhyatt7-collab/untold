@@ -296,24 +296,25 @@ main { position: relative; }
 
 /* ============================================================ CURSOR */
 .cursor {
-  position: fixed; top: 0; left: 0; width: 30px; height: 30px; border-radius: 50%;
-  border: 1.5px solid rgba(255,255,255,0.95);
-  box-shadow: 0 0 0 1px rgba(20,24,33,0.55), 0 2px 12px rgba(20,24,33,0.45);
-  transform: translate(-50%, -50%);
+  position: fixed; top: 0; left: 0; width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.9);
+  transform: translate3d(-100px, -100px, 0);
   pointer-events: none; z-index: 50;
-  transition: width 0.25s var(--ease), height 0.25s var(--ease), background 0.25s var(--ease), border-color 0.25s var(--ease);
+  will-change: transform;
+  transition: width 0.22s var(--ease), height 0.22s var(--ease), background 0.22s var(--ease), border-color 0.22s var(--ease);
 }
 /* solid centre dot so the cursor is always findable on any background */
 .cursor::after {
   content: ''; position: absolute; top: 50%; left: 50%;
-  width: 5px; height: 5px; border-radius: 50%;
+  width: 4px; height: 4px; border-radius: 50%;
   transform: translate(-50%, -50%);
-  background: #fff; box-shadow: 0 0 0 1px rgba(20,24,33,0.6);
+  background: #fff;
 }
 .cursor.is-hover {
-  width: 52px; height: 52px;
-  background: rgba(255,255,255,0.14);
+  width: 50px; height: 50px;
+  background: rgba(255,255,255,0.12);
   border-color: #fff;
+  mix-blend-mode: difference;
 }
 @media (pointer: coarse) { body { cursor: auto; } .cursor { display: none; } }
 

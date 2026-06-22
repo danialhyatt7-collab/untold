@@ -25,15 +25,29 @@ export async function mountMedia() {
 
     if (entry.video) {
       const v = document.createElement('video');
-      v.src = `./media/${entry.video}`;
       if (entry.poster) v.poster = `./media/${entry.poster}`;
       v.muted = true;
       v.loop = true;
       v.playsInline = true;
-      v.autoplay = true;
-      v.preload = 'metadata';
+      v.preload = 'none'; // don't pull the (heavy) video until the panel is near
+      v.dataset.src = `./media/${entry.video}`;
       panel.insertBefore(v, label || null);
-      v.play().catch(() => {});
+
+      // load + play only while the panel is on/near screen; pause otherwise
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((en) => {
+            if (en.isIntersecting) {
+              if (!v.src) v.src = v.dataset.src;
+              v.play().catch(() => {});
+            } else {
+              v.pause();
+            }
+          });
+        },
+        { rootMargin: '40% 0px 40% 0px' }
+      );
+      io.observe(panel);
     } else if (entry.poster) {
       const img = document.createElement('img');
       img.src = `./media/${entry.poster}`;
