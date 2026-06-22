@@ -1,20 +1,14 @@
 {
-  "monolith": {
-    "poster": "monolith.webp",
-    "video": "monolith.mp4",
-    "caption": "untold — monolith / the seam"
+  "crowd": {
+    "poster": "crowd.webp",
+    "caption": "untold — Islamabad / 2026"
   },
-  "aurora": {
-    "poster": "aurora.webp",
-    "caption": "Last transmission — 71.2°N"
+  "lights": {
+    "poster": "lights.webp",
+    "caption": "Lights down. Bass up."
   },
-  "tunnel": {
-    "poster": "tunnel.webp",
-    "caption": "Chamber — descent"
-  },
-  "crystal": {
-    "poster": "crystal.webp",
-    "video": "crystal.mp4",
-    "caption": "Specimen 003 / fracture"
+  "venue": {
+    "poster": "venue.webp",
+    "caption": "Under the Margallas"
   }
 }

@@ -6,16 +6,8 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 
 import CameraRig from '../world/CameraRig.js';
-import Lights from '../world/Lights.js';
 import Atmosphere from '../world/Atmosphere.js';
-import Snow from '../world/Snow.js';
-import IceMonolith from '../world/IceMonolith.js';
-import FrozenObjects from '../world/FrozenObjects.js';
-import Portal from '../world/Portal.js';
-import Floor from '../world/Floor.js';
-import Starfield from '../world/Starfield.js';
-import BlackHole from '../world/BlackHole.js';
-import { buildEnvironment } from '../world/Environment.js';
+import ParticleField from '../world/ParticleField.js';
 
 import Nav from './Nav.js';
 import Loader from './Loader.js';
@@ -28,14 +20,7 @@ export default class App {
   constructor() {
     this.canvas = document.getElementById('webgl');
     this.clock = new THREE.Clock();
-    this.intro = { v: 0 }; // 0 = loader framing, 1 = live flight
-    this.sceneReady = false;
-
-    // space-travel state
-    this.warp = 0; // eased scroll-velocity -> hyperspace streaks + FOV
-    this.warpBoost = 0; // one-shot "light-speed jump" on entering the world
-    this.lastProgress = 0;
-    this.prevWorldVisible = false;
+    this.intro = { v: 0 }; // 0 = loader framing, 1 = live stage
 
     this._initRenderer();
     this._initScene();
@@ -54,26 +39,15 @@ export default class App {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.95;
+    this.renderer.toneMappingExposure = 1.0;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
   }
 
   _initScene() {
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2('#0c0f17', 0.006); // deep-space haze
-
     this.rig = new CameraRig();
-    this.scene.environment = buildEnvironment(this.renderer);
-
-    this.lights = new Lights(this.scene);
     this.atmosphere = new Atmosphere(this.scene);
-    this.snow = new Snow(this.scene);
-    this.monolith = new IceMonolith(this.scene);
-    this.frozen = new FrozenObjects(this.scene);
-    this.portal = new Portal(this.scene);
-    this.floor = new Floor(this.scene);
-    this.starfield = new Starfield(this.scene);
-    this.blackhole = new BlackHole(this.scene);
+    this.particles = new ParticleField(this.scene);
   }
 
   _initPost() {
@@ -82,9 +56,9 @@ export default class App {
 
     this.bloom = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.5, // strength
-      0.8, // radius
-      0.95 // threshold — only the seam + portal rings bloom, not the bright fog
+      0.85, // strength — the wordmarks glow
+      0.7, // radius
+      0.18 // threshold
     );
     this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
@@ -99,6 +73,7 @@ export default class App {
     this.quality = 0;
     this._frames = 0;
     this._fpsT = performance.now();
+    this.composer.setPixelRatio(1);
     this._applyQuality();
   }
 
@@ -116,7 +91,6 @@ export default class App {
     const fps = (this._frames * 1000) / dt;
     this._frames = 0;
     this._fpsT = now;
-    // only step down, with headroom, to avoid flapping
     if (fps < 48 && this.quality < this.qLevels.length - 1) {
       this.quality++;
       this._applyQuality();
@@ -132,44 +106,40 @@ export default class App {
   _bind() {
     window.addEventListener('resize', () => this._resize());
 
-    // pointer -> normalised -1..1 for parallax + frozen-object reactivity
     window.addEventListener('pointermove', (e) => {
       const x = (e.clientX / window.innerWidth) * 2 - 1;
       const y = -((e.clientY / window.innerHeight) * 2 - 1);
       this.rig.setMouse(x, y);
-      this.frozen.setMouse(x, y);
+      // project the cursor onto the particle plane (z=0)
+      const halfH = Math.tan((42 * Math.PI) / 180 / 2) * 70;
+      const halfW = halfH * (window.innerWidth / window.innerHeight);
+      this.particles.setMouse(x * halfW, y * halfH);
     });
 
-    // pause heavy work when tab hidden
     document.addEventListener('visibilitychange', () => {
       this.hidden = document.hidden;
     });
   }
 
   async _boot() {
-    // progress while the GPU warms up / first frames render
     this.loader.to(0.35);
-
-    // render a few hidden frames so shaders compile before the reveal
     await this._warmup();
     this.loader.to(0.8);
 
-    // give fonts a beat, then hand off
     await document.fonts?.ready?.catch(() => {});
+    this.particles.refit(); // re-sample the wordmarks now Syne has loaded
     this.loader.to(1);
 
     await this.loader.finish();
-    this.sceneReady = true;
 
-    // seamless camera morph from loader framing into the flight
-    gsap.to(this.intro, { v: 1, duration: 2.6, ease: 'power2.inOut' });
+    gsap.to(this.intro, { v: 1, duration: 2.4, ease: 'power2.inOut' });
 
     this.nav.enable();
     this.nav.show();
     initInteractions();
     initHud();
     showChrome();
-    mountMedia(); // wire any Higgsfield-generated media into the full-bleed panels
+    mountMedia();
   }
 
   _warmup() {
@@ -187,16 +157,8 @@ export default class App {
   }
 
   _renderWorld(t) {
-    const camPos = this.rig.camera.position;
-    this.atmosphere.update(t, camPos);
-    this.snow.update(t, camPos, this.rig.mouse);
-    this.monolith.update(t, camPos.y, this.rig.camera);
-    this.frozen.update(t, camPos.y);
-    this.portal.update(t);
-    this.floor.update(t);
-    this.starfield.update(this.warp + this.warpBoost, camPos);
-    this.blackhole.update(t, this.rig.camera);
-    this.lights.update(camPos.y);
+    this.atmosphere.update(t, this.rig.camera.position);
+    this.particles.update(this.nav ? this.nav.progress : 0, t);
     this.composer.render();
   }
 
@@ -216,33 +178,14 @@ export default class App {
 
       this.nav.tick();
 
-      // The 3D world lives behind the opaque Higgsfield gallery panels. The
-      // last gallery panel fully covers the viewport until you scroll past it,
-      // so only render the world once it's actually being revealed (avoids the
-      // video panel + full 3D scene rendering at the same time).
+      // the particle stage lives behind the opaque Higgsfield gallery panels;
+      // only render it once it's actually being revealed
       const reveal = this.nav.galleryEnd - window.innerHeight + 4;
-      const worldVisible = this.nav.currentY > reveal;
-
-      // light-speed jump when punching out of the gallery into the world
-      if (worldVisible && !this.prevWorldVisible && this.nav.progress < 0.04) {
-        this.warpBoost = 1;
-        gsap.to(this, { warpBoost: 0, duration: 1.3, ease: 'power3.out', overwrite: true });
-      }
-      this.prevWorldVisible = worldVisible;
-
-      if (worldVisible) {
-        // scroll velocity -> eased warp (hyperspace streaks + FOV)
-        const dp = Math.abs(this.nav.progress - this.lastProgress);
-        this.lastProgress = this.nav.progress;
-        this.warp += (Math.min(dp * 17, 1) - this.warp) * 0.1;
-        this.rig.warp = Math.min(1, this.warp + this.warpBoost);
-
+      if (this.nav.currentY > reveal) {
         this.rig.update(this.nav.progress, t, this.intro.v);
         this._renderWorld(t);
         this._sampleFps();
       } else {
-        this.lastProgress = this.nav.progress;
-        this.warp = 0;
         this._fpsT = performance.now();
         this._frames = 0;
       }
