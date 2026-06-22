@@ -204,10 +204,11 @@ export default class App {
 
       this.nav.tick();
 
-      // The 3D world lives behind the opaque Higgsfield gallery panels. While
-      // we're deep in the gallery it's fully covered, so skip the entire WebGL
-      // pass — frees the GPU so the gallery + cursor stay buttery.
-      const reveal = this.nav.galleryEnd - window.innerHeight * 1.15;
+      // The 3D world lives behind the opaque Higgsfield gallery panels. The
+      // last gallery panel fully covers the viewport until you scroll past it,
+      // so only render the world once it's actually being revealed (avoids the
+      // video panel + full 3D scene rendering at the same time).
+      const reveal = this.nav.galleryEnd - window.innerHeight + 4;
       const worldVisible = this.nav.currentY > reveal;
       if (worldVisible) {
         this.rig.update(this.nav.progress, t, this.intro.v);
