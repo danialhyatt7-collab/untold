@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { createIceMaterial } from './IceMaterial.js';
+import { metalMatcap } from './matcaps.js';
 
 /**
  * The "events" — real 3D objects suspended inside blocks of ice, spaced down
@@ -21,12 +22,10 @@ export default class FrozenObjects {
     this.targetMouse = new THREE.Vector2();
     this.mouse = new THREE.Vector2();
 
-    // the inner objects use a frosted metal so they read against the clear ice
-    const coreMat = new THREE.MeshStandardMaterial({
-      color: '#9aa0af',
-      metalness: 0.85,
-      roughness: 0.35,
-      envMapIntensity: 1.2
+    // the inner objects use a matcap metal so they read against the ice (cheap)
+    const coreMat = new THREE.MeshMatcapMaterial({
+      color: '#aab0bd',
+      matcap: metalMatcap()
     });
     this.coreMat = coreMat;
 
@@ -34,13 +33,11 @@ export default class FrozenObjects {
       const block = new THREE.Group();
 
       const iceMat = createIceMaterial({
-        color: '#c9ced8',
-        transmission: 0.92, // true glass refraction on the showcased objects
-        thickness: 2.6,
-        roughness: 0.22,
-        clearcoat: 0.6,
-        attenuation: '#7d8596',
-        attenuationDistance: 5,
+        color: '#cdd2dc',
+        opacity: 0.5, // translucent so the frozen object reads through the ice
+        rim: '#e6ecf6',
+        rimStrength: 0.7, // glassy lit edge
+        rimPower: 2.2,
         frost: 0.3 + Math.random() * 0.25
       });
 

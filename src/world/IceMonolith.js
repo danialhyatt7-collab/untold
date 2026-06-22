@@ -67,7 +67,50 @@ export default class IceMonolith {
     this.seamLight = new THREE.PointLight('#dfe3ec', 30, 50, 2);
     this.group.add(this.seamLight);
 
+    // ---- anamorphic horizontal flare riding the seam (Interstellar streak) ----
+    const streakMat = new THREE.MeshBasicMaterial({
+      map: this._streakTexture(),
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      depthTest: false,
+      toneMapped: false,
+      opacity: 0.9
+    });
+    this.streakMat = streakMat;
+    this.streak = new THREE.Mesh(new THREE.PlaneGeometry(48, 4.2), streakMat);
+    this.streak.renderOrder = 5;
+    this.group.add(this.streak);
+
     scene.add(this.group);
+  }
+
+  /** soft horizontal light-streak sprite for the anamorphic flare. */
+  _streakTexture() {
+    const w = 512;
+    const h = 64;
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    const ctx = c.getContext('2d');
+    // horizontal: bright core fading to the sides
+    const gx = ctx.createLinearGradient(0, 0, w, 0);
+    gx.addColorStop(0.0, 'rgba(0,0,0,0)');
+    gx.addColorStop(0.5, 'rgba(255,255,255,1)');
+    gx.addColorStop(1.0, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gx;
+    ctx.fillRect(0, 0, w, h);
+    // vertical falloff so it's a thin blade
+    const gy = ctx.createLinearGradient(0, 0, 0, h);
+    gy.addColorStop(0.0, 'rgba(0,0,0,1)');
+    gy.addColorStop(0.5, 'rgba(0,0,0,0)');
+    gy.addColorStop(1.0, 'rgba(0,0,0,1)');
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = gy;
+    ctx.fillRect(0, 0, w, h);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
   }
 
   /** smooth, tumbled pillow-block: rounded cube with gentle frost undulation. */
@@ -92,7 +135,7 @@ export default class IceMonolith {
     return geo;
   }
 
-  update(time, cameraY = 0) {
+  update(time, cameraY = 0, camera = null) {
     this.material.userData.uniforms.uTime.value = time;
     // breathing glow on the seam
     const pulse = 0.85 + Math.sin(time * 0.8) * 0.15;
@@ -100,5 +143,16 @@ export default class IceMonolith {
     this.seamLight.intensity = 26 * pulse;
     this.seamLight.position.y = cameraY; // pool follows the descent
     this.group.rotation.y = Math.sin(time * 0.04) * 0.04;
+
+    // anamorphic flare rides the visible seam and faces the camera
+    const flare = 0.6 + Math.sin(time * 1.3) * 0.25;
+    this.streak.position.set(0, cameraY + 2, 5.2);
+    this.streakMat.opacity = 0.4 * flare + 0.12;
+    this.streak.scale.x = 0.9 + flare * 0.3;
+    if (camera) {
+      // counter the group's yaw so the streak stays camera-facing & level
+      this.streak.quaternion.copy(camera.quaternion);
+      this.streak.quaternion.premultiply(this.group.quaternion.clone().invert());
+    }
   }
 }

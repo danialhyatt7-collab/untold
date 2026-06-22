@@ -58,6 +58,35 @@ export default class Portal {
     this.nodes = new THREE.Points(nodeGeo, nodeMat);
     this.group.add(this.nodes);
 
+    // ---- constellation lines: connect nearby nodes (thin GL lines, ~free) ----
+    const seg = [];
+    const v = new THREE.Vector3();
+    const u = new THREE.Vector3();
+    for (let i = 0; i < N; i++) {
+      v.set(pts[i * 3], pts[i * 3 + 1], pts[i * 3 + 2]);
+      let links = 0;
+      for (let j = i + 1; j < N && links < 2; j++) {
+        u.set(pts[j * 3], pts[j * 3 + 1], pts[j * 3 + 2]);
+        if (v.distanceTo(u) < 9) {
+          seg.push(v.x, v.y, v.z, u.x, u.y, u.z);
+          links++;
+        }
+      }
+    }
+    const lineGeo = new THREE.BufferGeometry();
+    lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(seg), 3));
+    this.lines = new THREE.LineSegments(
+      lineGeo,
+      new THREE.LineBasicMaterial({
+        color: new THREE.Color('#aab0bd'),
+        transparent: true,
+        opacity: 0.18,
+        toneMapped: false,
+        depthWrite: false
+      })
+    );
+    this.group.add(this.lines);
+
     scene.add(this.group);
   }
 
@@ -72,5 +101,7 @@ export default class Portal {
       }
     });
     this.nodes.rotation.y = time * 0.02;
+    this.lines.rotation.y = time * 0.02;
+    this.lines.material.opacity = 0.12 + (Math.sin(time * 0.6) * 0.5 + 0.5) * 0.12;
   }
 }
