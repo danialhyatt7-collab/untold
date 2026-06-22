@@ -31,14 +31,22 @@ export function initHud() {
   });
 
   const t0 = performance.now();
+  let lastText = 0;
   const tick = () => {
-    const t = (performance.now() - t0) / 1000;
+    const now = performance.now();
+    const t = (now - t0) / 1000;
+    // text readouts only need to tick a few times a second (avoid layout thrash)
+    const writeText = now - lastText > 110;
+    if (writeText) lastText = now;
     MARKERS.forEach((m, i) => {
-      const v = m.base + Math.sin(t * 0.6 + i * 1.7) * m.amp;
-      vals[i].textContent = (m.key === 'DEPTH' ? Math.round(v) : v.toFixed(2)) + (m.unit || '');
+      if (writeText) {
+        const v = m.base + Math.sin(t * 0.6 + i * 1.7) * m.amp;
+        vals[i].textContent = (m.key === 'DEPTH' ? Math.round(v) : v.toFixed(2)) + (m.unit || '');
+      }
+      // transform-only drift stays smooth (GPU-composited, no layout)
       const px = (m.x - 50) * 0.04 * mouse.x;
       const py = (m.y - 50) * 0.04 * mouse.y;
-      els[i].style.transform = `translate(${px + Math.sin(t * 0.4 + i) * 4}px, ${py + Math.cos(t * 0.3 + i) * 4}px)`;
+      els[i].style.transform = `translate3d(${px + Math.sin(t * 0.4 + i) * 4}px, ${py + Math.cos(t * 0.3 + i) * 4}px, 0)`;
     });
     requestAnimationFrame(tick);
   };

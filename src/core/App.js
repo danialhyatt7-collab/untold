@@ -197,15 +197,26 @@ export default class App {
   }
 
   start() {
-    const loop = (timeMs) => {
+    const loop = () => {
       requestAnimationFrame(loop);
       if (this.hidden) return;
       const t = this.clock.getElapsedTime();
 
       this.nav.tick();
-      this.rig.update(this.nav.progress, t, this.intro.v);
-      this._renderWorld(t);
-      this._sampleFps();
+
+      // The 3D world lives behind the opaque Higgsfield gallery panels. While
+      // we're deep in the gallery it's fully covered, so skip the entire WebGL
+      // pass — frees the GPU so the gallery + cursor stay buttery.
+      const reveal = this.nav.galleryEnd - window.innerHeight * 1.15;
+      const worldVisible = this.nav.currentY > reveal;
+      if (worldVisible) {
+        this.rig.update(this.nav.progress, t, this.intro.v);
+        this._renderWorld(t);
+        this._sampleFps();
+      } else {
+        this._fpsT = performance.now();
+        this._frames = 0;
+      }
     };
     requestAnimationFrame(loop);
   }

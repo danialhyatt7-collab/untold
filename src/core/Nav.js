@@ -53,10 +53,17 @@ export default class Nav {
   /* ---------------- per-frame easing (called from the render loop) -------- */
   tick() {
     if (!this.enabled) return;
-    this.currentY += (this.targetY - this.currentY) * EASE;
-    if (Math.abs(this.targetY - this.currentY) < 0.4) this.currentY = this.targetY;
-    window.scrollTo(0, this.currentY);
+    const moving = Math.abs(this.targetY - this.currentY) >= 0.4;
+    if (!moving) {
+      if (this._settled) return; // nothing changed — skip all DOM writes
+      this.currentY = this.targetY;
+      this._settled = true;
+    } else {
+      this.currentY += (this.targetY - this.currentY) * EASE;
+      this._settled = false;
+    }
 
+    window.scrollTo(0, this.currentY);
     const denom = Math.max(1, this.maxScroll - this.galleryEnd);
     this.progress = Math.min(1, Math.max(0, (this.currentY - this.galleryEnd) / denom));
 

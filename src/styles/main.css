@@ -92,7 +92,13 @@ a { color: inherit; text-decoration: none; }
   background: var(--white);
   opacity: 0; pointer-events: none;
   will-change: opacity;
+  transform: translateZ(0);
 }
+
+/* keep each slide's repaint isolated so scrolling stays cheap */
+.section, .panel, .outro { contain: layout paint; }
+.panel__bg img, .panel__bg video { will-change: transform; backface-visibility: hidden; }
+.hud__marker { will-change: transform; }
 
 /* ---- NAV ---- */
 .nav {
