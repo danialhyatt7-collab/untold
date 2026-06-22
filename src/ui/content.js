@@ -1,97 +1,112 @@
 /**
- * untold — Islamabad rave festival.
- *   GALLERY (Higgsfield · slide-snap): cinematic festival teaser panels.
- *   WORLD   (particles · smooth scroll): the wordmark cloud morphs
- *     untold → AIRBEAT → DIMENSIONS → AWAKENING → untold, one per section,
- *     with the event details overlaid.
+ * Two separated groups:
+ *   1. GALLERY — the Higgsfield image/video panels (full-bleed, slide-snap).
+ *   2. WORLD   — the live Three.js sections (smooth, continuous descent).
+ * The first non-.panel section marks where the smooth world zone begins.
  */
 export function injectContent(root) {
   root.innerHTML = `
-    <!-- ============================ GALLERY (teaser) ============================ -->
+    <!-- ============================ GALLERY (Higgsfield · slide-snap) ============================ -->
 
-    <section class="panel panel--center" id="intro">
-      <div class="panel__bg" data-media data-key="crowd"></div>
+    <!-- aurora · THE ICE REMEMBERS -->
+    <section class="panel panel--center" id="remembers">
+      <div class="panel__bg" data-media data-key="aurora"></div>
       <div class="panel__veil"></div>
       <div class="panel__content">
-        <p class="eyebrow eyebrow--light reveal">Islamabad · est. 2026</p>
-        <h2 class="statement reveal">untold</h2>
-        <p class="lede lede--center reveal">A rave is a story you can't tell afterwards. We throw the ones worth not remembering.</p>
-        <div class="coords coords--center reveal"><span>ISLAMABAD · PK</span><span>33.6°N / 73.0°E</span><span>SUMMER 2026</span></div>
+        <p class="eyebrow eyebrow--light reveal">/////// Transmission</p>
+        <h2 class="statement reveal">The ice<br/>remembers.</h2>
+        <p class="lede lede--center reveal">Long after we forget, the cold keeps the record — every face, every winter, every word we never said. We only learned to read it.</p>
+        <div class="coords coords--center reveal"><span>MONOLITH EXP</span><span>71.2°N / 156.8°W</span><span>EST. 2026</span></div>
       </div>
     </section>
 
-    <section class="panel panel--center" id="teaser">
-      <div class="panel__bg" data-media data-key="lights"></div>
+    <!-- ice tunnel portal · WITHIN THE STRUCTURE -->
+    <section class="panel panel--center" id="structure">
+      <div class="panel__bg" data-media data-key="tunnel"></div>
       <div class="panel__veil panel__veil--soft"></div>
       <div class="panel__content">
-        <p class="eyebrow eyebrow--light reveal">/////// Three nights</p>
-        <h2 class="statement reveal">Lights down.<br/>Bass up.</h2>
-        <p class="lede lede--center reveal">Three festivals. One August. The loudest the capital has ever been.</p>
+        <p class="eyebrow eyebrow--light reveal">/////// Chamber — descent</p>
+        <h2 class="statement reveal">Within the<br/>structure.</h2>
+        <p class="lede lede--center reveal">Pass through the rings. Each is a threshold deeper into the monolith, where the temperature drops and the records grow older, clearer, colder.</p>
+        <p class="lede lede--center lede--mute reveal">Three documents, kept cold enough to stay honest.</p>
       </div>
     </section>
 
-    <section class="panel panel--bottom" id="film">
-      <div class="panel__bg" data-media data-key="venue"></div>
+    <!-- crystal macro · SPECIMEN -->
+    <section class="panel panel--right" id="specimen">
+      <div class="panel__bg" data-media data-key="crystal"></div>
+      <div class="panel__veil panel__veil--right"></div>
+      <div class="panel__content panel__content--right">
+        <p class="eyebrow reveal">Specimen 003 / Fracture</p>
+        <h2 class="display reveal">Frozen at the<br/>exact <em>moment.</em></h2>
+        <p class="lede reveal">Captured the instant before it was lost and suspended whole — every facet, every fracture, held at the temperature of memory.</p>
+        <dl class="spec reveal">
+          <div><dt>Core temp</dt><dd>−41.2°</dd></div>
+          <div><dt>Clarity</dt><dd>0.98</dd></div>
+          <div><dt>State</dt><dd>Preserved</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- monolith video · MOTION -->
+    <section class="panel panel--bottom" id="motion">
+      <div class="panel__bg" data-media data-key="monolith"></div>
       <div class="panel__veil"></div>
       <div class="panel__content panel__content--bottom">
-        <p class="eyebrow eyebrow--light reveal">Under the Margallas</p>
-        <h2 class="display reveal">Where the city<br/>comes to <em>disappear.</em></h2>
-        <span class="media__label media__label--inline reveal">untold — Islamabad / 2026</span>
+        <p class="eyebrow eyebrow--light reveal">Captured in motion</p>
+        <h2 class="display reveal">Light, refracted<br/>through <em>memory.</em></h2>
+        <span class="media__label media__label--inline reveal">untold — monolith / the seam</span>
       </div>
     </section>
 
-    <!-- ============================ WORLD (particles) ============================ -->
+    <!-- ============================ WORLD (Three.js · smooth scroll) ============================ -->
 
     <section class="section section--hero" id="top">
-      <p class="eyebrow reveal">No.00 — The festival</p>
-      <p class="lede reveal">untold is a rave collective from Islamabad, Pakistan — three nights of electronic music under the Margalla hills this August.</p>
-      <div class="coords reveal"><span>Scroll to enter the lineup</span></div>
+      <p class="eyebrow reveal">No.01 — Frozen archive</p>
+      <h1 class="display reveal">Some stories are<br/>never told.<br/><em>We keep them in ice.</em></h1>
+      <p class="lede reveal">untold is a studio preserving the moments that slipped past language — sealed in a slow winter, suspended in light, waiting to thaw.</p>
+      <div class="coords reveal"><span>MONOLITH EXP</span><span>71.2°N / 156.8°W</span><span>EST. 2026</span></div>
     </section>
 
-    <section class="section section--right" id="airbeat">
-      <p class="eyebrow reveal">01 / Festival</p>
-      <div class="event reveal">
-        <div class="event__date">Fri 7 — Sat 8 Aug 2026</div>
-        <div class="event__meta"><span>Shakarparian Hills</span><span>Islamabad</span></div>
-        <p class="event__lede">Open-air mainstage. Big-room, trance and melodic techno until the call to dawn.</p>
-        <a class="link-cta" href="#enter">Get tickets <span>↘</span></a>
+    <section class="section" id="world">
+      <p class="eyebrow reveal">The world</p>
+      <h2 class="display reveal">A single descent<br/>through frozen <em>time.</em></h2>
+      <p class="lede reveal">One continuous flight. No cuts, no doors. You fall — weightless — past monoliths of glass while the cold light bends around every memory we've kept.</p>
+    </section>
+
+    <section class="section" id="archive">
+      <p class="eyebrow reveal">The archive</p>
+      <h2 class="display reveal">Five things we<br/>refused to lose.</h2>
+      <div class="archive reveal">
+        <div class="archive__row"><span class="archive__no">001</span><span class="archive__name">Origin</span><span class="archive__year">'19</span></div>
+        <div class="archive__row"><span class="archive__no">002</span><span class="archive__name">Drift</span><span class="archive__year">'21</span></div>
+        <div class="archive__row"><span class="archive__no">003</span><span class="archive__name">Fracture</span><span class="archive__year">'23</span></div>
+        <div class="archive__row"><span class="archive__no">004</span><span class="archive__name">Bloom</span><span class="archive__year">'24</span></div>
+        <div class="archive__row"><span class="archive__no">005</span><span class="archive__name">Vanish</span><span class="archive__year">'26</span></div>
       </div>
     </section>
 
-    <section class="section section--right" id="dimensions">
-      <p class="eyebrow reveal">02 / Festival</p>
-      <div class="event reveal">
-        <div class="event__date">Fri 14 — Sun 16 Aug 2026</div>
-        <div class="event__meta"><span>Rawal Lake Amphitheatre</span><span>Islamabad</span></div>
-        <p class="event__lede">Three stages by the water. Deep house, minimal and dub for the heads who stay late.</p>
-        <a class="link-cta" href="#enter">Get tickets <span>↘</span></a>
-      </div>
-    </section>
-
-    <section class="section section--right" id="awakening">
-      <p class="eyebrow reveal">03 / Festival</p>
-      <div class="event reveal">
-        <div class="event__date">Sat 22 — Sun 23 Aug 2026</div>
-        <div class="event__meta"><span>Margalla Greens</span><span>Islamabad</span></div>
-        <p class="event__lede">Sunrise set. Progressive and organic house to carry you into the morning light.</p>
-        <a class="link-cta" href="#enter">Get tickets <span>↘</span></a>
-      </div>
+    <section class="section section--right" id="manifest">
+      <p class="eyebrow reveal">Manifest</p>
+      <h2 class="display reveal">We don't record.<br/>We <em>preserve.</em></h2>
+      <p class="lede reveal">Every artefact you passed is real, modelled and frozen in real time. Move your cursor — the ice answers. Nothing here is a video of a place. It is the place.</p>
     </section>
 
     <section class="outro" id="enter">
       <div class="outro__main">
-        <p class="outro__sub reveal">Three nights · Islamabad · August 2026</p>
-        <a class="link-cta link-cta--big reveal" href="tel:+923374841818">+92 33 7484 1818</a>
-        <div class="outro__links reveal">
-          <a href="mailto:hello@untold.pk">hello@untold.pk</a>
-          <a href="#top">Instagram</a>
-          <a href="#top">Tickets</a>
-        </div>
+        <p class="outro__sub reveal">The thaw begins with you</p>
+        <h2 class="outro__word reveal">untold</h2>
+        <a class="nav__cta reveal" href="mailto:hello@untold.studio">Enter the archive <span>↘</span></a>
+        <svg class="constellation reveal" viewBox="0 0 240 120" aria-hidden="true">
+          <polyline points="20,90 60,40 110,70 150,30 200,80 220,50" />
+          <circle cx="20" cy="90" r="2"/><circle cx="60" cy="40" r="2"/><circle cx="110" cy="70" r="2"/>
+          <circle cx="150" cy="30" r="2"/><circle cx="200" cy="80" r="2"/><circle cx="220" cy="50" r="2"/>
+        </svg>
       </div>
       <footer class="footer">
-        <span>untold® — Islamabad, Pakistan</span>
-        <span>// Rave responsibly</span>
-        <span>+92 33 7484 1818</span>
+        <span>untold® — Monolith Exp. 2026</span>
+        <span>// Frozen in real-time · Three.js</span>
+        <span>71.2°N / Perpetual winter</span>
       </footer>
     </section>
   `;

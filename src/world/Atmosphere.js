@@ -10,8 +10,8 @@ export default class Atmosphere {
   constructor(scene) {
     this.uniforms = {
       uTime: { value: 0 },
-      uTop: { value: new THREE.Color('#14161d') },
-      uBottom: { value: new THREE.Color('#2a2f3b') }
+      uTop: { value: new THREE.Color('#080a10') },
+      uBottom: { value: new THREE.Color('#1a2030') }
     };
 
     const geo = new THREE.SphereGeometry(260, 32, 24);

@@ -4,10 +4,13 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 
 import CameraRig from '../world/CameraRig.js';
 import Atmosphere from '../world/Atmosphere.js';
-import ParticleField from '../world/ParticleField.js';
+import Starfield from '../world/Starfield.js';
+import BlackHole from '../world/BlackHole.js';
+import postFrag from '../shaders/post.frag';
 
 import Nav from './Nav.js';
 import Loader from './Loader.js';
@@ -20,7 +23,13 @@ export default class App {
   constructor() {
     this.canvas = document.getElementById('webgl');
     this.clock = new THREE.Clock();
-    this.intro = { v: 0 }; // 0 = loader framing, 1 = live stage
+    this.intro = { v: 0 };
+
+    this.warp = 0;
+    this.warpBoost = 0;
+    this.lastProgress = 0;
+    this.prevWorldVisible = false;
+    this._bh = new THREE.Vector3();
 
     this._initRenderer();
     this._initScene();
@@ -47,7 +56,8 @@ export default class App {
     this.scene = new THREE.Scene();
     this.rig = new CameraRig();
     this.atmosphere = new Atmosphere(this.scene);
-    this.particles = new ParticleField(this.scene);
+    this.starfield = new Starfield(this.scene);
+    this.blackhole = new BlackHole(this.scene);
   }
 
   _initPost() {
@@ -56,14 +66,30 @@ export default class App {
 
     this.bloom = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.85, // strength — the wordmarks glow
-      0.7, // radius
-      0.18 // threshold
+      0.9, // strength
+      0.75, // radius
+      0.2 // threshold
     );
     this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
 
-    // ---- adaptive quality: steps down resolution (then bloom) if FPS dips ----
+    // cinematic post: gravitational lensing + chromatic aberration + grade
+    this.post = new ShaderPass({
+      uniforms: {
+        tDiffuse: { value: null },
+        uCenter: { value: new THREE.Vector2(0.5, 0.5) },
+        uAspect: { value: window.innerWidth / window.innerHeight },
+        uLensR: { value: 0.14 },
+        uLensS: { value: 0.0 },
+        uAberr: { value: 0.0035 },
+        uVignette: { value: 0.5 }
+      },
+      vertexShader:
+        'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+      fragmentShader: postFrag
+    });
+    this.composer.addPass(this.post);
+
     this.qLevels = [
       { pr: 1.0, bloom: true },
       { pr: 0.8, bloom: true },
@@ -73,7 +99,6 @@ export default class App {
     this.quality = 0;
     this._frames = 0;
     this._fpsT = performance.now();
-    this.composer.setPixelRatio(1);
     this._applyQuality();
   }
 
@@ -105,17 +130,11 @@ export default class App {
 
   _bind() {
     window.addEventListener('resize', () => this._resize());
-
     window.addEventListener('pointermove', (e) => {
       const x = (e.clientX / window.innerWidth) * 2 - 1;
       const y = -((e.clientY / window.innerHeight) * 2 - 1);
       this.rig.setMouse(x, y);
-      // project the cursor onto the particle plane (z=0)
-      const halfH = Math.tan((42 * Math.PI) / 180 / 2) * 70;
-      const halfW = halfH * (window.innerWidth / window.innerHeight);
-      this.particles.setMouse(x * halfW, y * halfH);
     });
-
     document.addEventListener('visibilitychange', () => {
       this.hidden = document.hidden;
     });
@@ -125,14 +144,11 @@ export default class App {
     this.loader.to(0.35);
     await this._warmup();
     this.loader.to(0.8);
-
     await document.fonts?.ready?.catch(() => {});
-    this.particles.refit(); // re-sample the wordmarks now Syne has loaded
     this.loader.to(1);
-
     await this.loader.finish();
 
-    gsap.to(this.intro, { v: 1, duration: 2.4, ease: 'power2.inOut' });
+    gsap.to(this.intro, { v: 1, duration: 2.6, ease: 'power2.inOut' });
 
     this.nav.enable();
     this.nav.show();
@@ -157,8 +173,19 @@ export default class App {
   }
 
   _renderWorld(t) {
-    this.atmosphere.update(t, this.rig.camera.position);
-    this.particles.update(this.nav ? this.nav.progress : 0, t);
+    const cam = this.rig.camera;
+    this.atmosphere.update(t, cam.position);
+    this.starfield.update(this.warp + this.warpBoost, cam.position);
+    this.blackhole.update(t, cam);
+
+    // feed the black hole's screen position to the lensing post pass
+    this._bh.copy(this.blackhole.worldPosition).project(cam);
+    const onScreen = this._bh.z < 1;
+    this.post.uniforms.uCenter.value.set(this._bh.x * 0.5 + 0.5, this._bh.y * 0.5 + 0.5);
+    const dist = cam.position.distanceTo(this.blackhole.worldPosition);
+    const near = THREE.MathUtils.clamp((230 - dist) / 170, 0, 1);
+    this.post.uniforms.uLensS.value = onScreen ? 0.02 + near * 0.16 : 0.0;
+
     this.composer.render();
   }
 
@@ -167,6 +194,7 @@ export default class App {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.composer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    this.post.uniforms.uAspect.value = window.innerWidth / window.innerHeight;
     this._applyQuality();
   }
 
@@ -175,17 +203,30 @@ export default class App {
       requestAnimationFrame(loop);
       if (this.hidden) return;
       const t = this.clock.getElapsedTime();
-
       this.nav.tick();
 
-      // the particle stage lives behind the opaque Higgsfield gallery panels;
-      // only render it once it's actually being revealed
       const reveal = this.nav.galleryEnd - window.innerHeight + 4;
-      if (this.nav.currentY > reveal) {
+      const worldVisible = this.nav.currentY > reveal;
+
+      if (worldVisible && !this.prevWorldVisible && this.nav.progress < 0.04) {
+        this.warpBoost = 1;
+        gsap.to(this, { warpBoost: 0, duration: 1.3, ease: 'power3.out', overwrite: true });
+      }
+      this.prevWorldVisible = worldVisible;
+
+      if (worldVisible) {
+        const dp = Math.abs(this.nav.progress - this.lastProgress);
+        this.lastProgress = this.nav.progress;
+        // baseline infall + scroll-velocity warp
+        this.warp += (Math.min(0.06 + dp * 17, 1) - this.warp) * 0.1;
+        this.rig.warp = Math.min(1, this.warp + this.warpBoost);
+
         this.rig.update(this.nav.progress, t, this.intro.v);
         this._renderWorld(t);
         this._sampleFps();
       } else {
+        this.lastProgress = this.nav.progress;
+        this.warp = 0;
         this._fpsT = performance.now();
         this._frames = 0;
       }
