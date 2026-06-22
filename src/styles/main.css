@@ -275,6 +275,13 @@ main { position: relative; }
 }
 .slide-dot:hover { transform: scale(1.3); }
 .slide-dot.is-active { background: #fff; border-color: #fff; height: 22px; border-radius: 5px; }
+/* gap + tick marking where the Higgsfield gallery ends and the 3D world begins */
+.slide-dot--divide { margin-top: 1.5rem; position: relative; }
+.slide-dot--divide::before {
+  content: ''; position: absolute; left: 50%; top: -0.9rem; transform: translateX(-50%);
+  width: 5px; height: 1px; background: rgba(255,255,255,0.5);
+}
+.slide-dot--world { border-style: dashed; }
 @media (max-width: 720px) { .slide-dots { right: 0.7rem; gap: 0.7rem; } }
 
 /* ============================================================ HUD TELEMETRY */

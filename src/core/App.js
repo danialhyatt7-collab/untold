@@ -14,9 +14,8 @@ import FrozenObjects from '../world/FrozenObjects.js';
 import Portal from '../world/Portal.js';
 import Floor from '../world/Floor.js';
 import { buildEnvironment } from '../world/Environment.js';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 
-import Slides from './Slides.js';
+import Nav from './Nav.js';
 import Loader from './Loader.js';
 import { injectContent } from '../ui/content.js';
 import { initInteractions, showChrome } from '../ui/interactions.js';
@@ -80,32 +79,6 @@ export default class App {
     this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
 
-    // ---- film grain + vignette (one cheap fullscreen pass, very filmic) ----
-    this.grain = new ShaderPass({
-      uniforms: {
-        tDiffuse: { value: null },
-        uTime: { value: 0 },
-        uGrain: { value: 0.05 },
-        uVignette: { value: 0.5 }
-      },
-      vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-      fragmentShader: `
-        uniform sampler2D tDiffuse; uniform float uTime; uniform float uGrain; uniform float uVignette;
-        varying vec2 vUv;
-        float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233))) * 43758.5453); }
-        void main(){
-          vec4 c = texture2D(tDiffuse, vUv);
-          float g = hash(vUv * vec2(1280.0, 720.0) + fract(uTime)) * 2.0 - 1.0;
-          c.rgb += g * uGrain;
-          vec2 q = vUv - 0.5;
-          float v = smoothstep(0.95, 0.32, length(q));
-          c.rgb *= mix(1.0 - uVignette, 1.0, v);
-          gl_FragColor = c;
-        }
-      `
-    });
-    this.composer.addPass(this.grain);
-
     // ---- adaptive quality: steps down resolution (then bloom) if FPS dips ----
     this.qLevels = [
       { pr: 1.0, bloom: true },
@@ -142,7 +115,7 @@ export default class App {
 
   _initContent() {
     injectContent(document.getElementById('content'));
-    this.slides = new Slides();
+    this.nav = new Nav();
     this.loader = new Loader();
   }
 
@@ -181,8 +154,8 @@ export default class App {
     // seamless camera morph from loader framing into the flight
     gsap.to(this.intro, { v: 1, duration: 2.6, ease: 'power2.inOut' });
 
-    this.slides.enable();
-    this.slides.show();
+    this.nav.enable();
+    this.nav.show();
     initInteractions();
     initHud();
     showChrome();
@@ -212,7 +185,6 @@ export default class App {
     this.portal.update(t);
     this.floor.update(t);
     this.lights.update(camPos.y);
-    if (this.grain) this.grain.uniforms.uTime.value = t;
     this.composer.render();
   }
 
@@ -230,7 +202,8 @@ export default class App {
       if (this.hidden) return;
       const t = this.clock.getElapsedTime();
 
-      this.rig.update(this.slides.progress, t, this.intro.v);
+      this.nav.tick();
+      this.rig.update(this.nav.progress, t, this.intro.v);
       this._renderWorld(t);
       this._sampleFps();
     };
