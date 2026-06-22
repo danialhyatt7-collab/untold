@@ -21,6 +21,8 @@ export default class CameraRig {
     this.scroll = 0; // eased 0..1
     this.mouse = new THREE.Vector2(0, 0); // eased -1..1
     this.targetMouse = new THREE.Vector2(0, 0);
+    this.baseFov = 42;
+    this.warp = 0; // 0..1 travel speed -> widens FOV for an acceleration feel
 
     this._pos = new THREE.Vector3();
     this._look = new THREE.Vector3();
@@ -86,5 +88,12 @@ export default class CameraRig {
 
     // subtle dolly-roll for the weightless feel
     this.camera.rotation.z = this.mouse.x * 0.03 + Math.sin(time * 0.2) * 0.01;
+
+    // speed-reactive FOV — widening lens reads as acceleration into space
+    const targetFov = this.baseFov + this.warp * 14;
+    if (Math.abs(targetFov - this.camera.fov) > 0.01) {
+      this.camera.fov += (targetFov - this.camera.fov) * 0.1;
+      this.camera.updateProjectionMatrix();
+    }
   }
 }

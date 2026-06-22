@@ -13,6 +13,8 @@ import IceMonolith from '../world/IceMonolith.js';
 import FrozenObjects from '../world/FrozenObjects.js';
 import Portal from '../world/Portal.js';
 import Floor from '../world/Floor.js';
+import Starfield from '../world/Starfield.js';
+import BlackHole from '../world/BlackHole.js';
 import { buildEnvironment } from '../world/Environment.js';
 
 import Nav from './Nav.js';
@@ -28,6 +30,12 @@ export default class App {
     this.clock = new THREE.Clock();
     this.intro = { v: 0 }; // 0 = loader framing, 1 = live flight
     this.sceneReady = false;
+
+    // space-travel state
+    this.warp = 0; // eased scroll-velocity -> hyperspace streaks + FOV
+    this.warpBoost = 0; // one-shot "light-speed jump" on entering the world
+    this.lastProgress = 0;
+    this.prevWorldVisible = false;
 
     this._initRenderer();
     this._initScene();
@@ -52,7 +60,7 @@ export default class App {
 
   _initScene() {
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2('#828892', 0.011);
+    this.scene.fog = new THREE.FogExp2('#0c0f17', 0.006); // deep-space haze
 
     this.rig = new CameraRig();
     this.scene.environment = buildEnvironment(this.renderer);
@@ -64,6 +72,8 @@ export default class App {
     this.frozen = new FrozenObjects(this.scene);
     this.portal = new Portal(this.scene);
     this.floor = new Floor(this.scene);
+    this.starfield = new Starfield(this.scene);
+    this.blackhole = new BlackHole(this.scene);
   }
 
   _initPost() {
@@ -184,6 +194,8 @@ export default class App {
     this.frozen.update(t, camPos.y);
     this.portal.update(t);
     this.floor.update(t);
+    this.starfield.update(this.warp + this.warpBoost, camPos);
+    this.blackhole.update(t, this.rig.camera);
     this.lights.update(camPos.y);
     this.composer.render();
   }
@@ -210,11 +222,27 @@ export default class App {
       // video panel + full 3D scene rendering at the same time).
       const reveal = this.nav.galleryEnd - window.innerHeight + 4;
       const worldVisible = this.nav.currentY > reveal;
+
+      // light-speed jump when punching out of the gallery into the world
+      if (worldVisible && !this.prevWorldVisible && this.nav.progress < 0.04) {
+        this.warpBoost = 1;
+        gsap.to(this, { warpBoost: 0, duration: 1.3, ease: 'power3.out', overwrite: true });
+      }
+      this.prevWorldVisible = worldVisible;
+
       if (worldVisible) {
+        // scroll velocity -> eased warp (hyperspace streaks + FOV)
+        const dp = Math.abs(this.nav.progress - this.lastProgress);
+        this.lastProgress = this.nav.progress;
+        this.warp += (Math.min(dp * 17, 1) - this.warp) * 0.1;
+        this.rig.warp = Math.min(1, this.warp + this.warpBoost);
+
         this.rig.update(this.nav.progress, t, this.intro.v);
         this._renderWorld(t);
         this._sampleFps();
       } else {
+        this.lastProgress = this.nav.progress;
+        this.warp = 0;
         this._fpsT = performance.now();
         this._frames = 0;
       }
