@@ -66,8 +66,8 @@ export default class App {
 
     this.bloom = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.9, // strength
-      0.75, // radius
+      0.75, // strength
+      0.6, // radius
       0.2 // threshold
     );
     this.composer.addPass(this.bloom);
@@ -82,7 +82,7 @@ export default class App {
         uLensR: { value: 0.14 },
         uLensS: { value: 0.0 },
         uAberr: { value: 0.0035 },
-        uVignette: { value: 0.5 }
+        uVignette: { value: 0.28 }
       },
       vertexShader:
         'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
@@ -90,11 +90,13 @@ export default class App {
     });
     this.composer.addPass(this.post);
 
+    // render the whole 3D + post at a sub-native resolution for headroom; the
+    // scaler steps down further (then drops bloom) if FPS still dips
     this.qLevels = [
-      { pr: 1.0, bloom: true },
-      { pr: 0.8, bloom: true },
-      { pr: 0.66, bloom: true },
-      { pr: 0.6, bloom: false }
+      { pr: 0.82, bloom: true },
+      { pr: 0.7, bloom: true },
+      { pr: 0.58, bloom: false },
+      { pr: 0.5, bloom: false }
     ];
     this.quality = 0;
     this._frames = 0;

@@ -9,7 +9,7 @@ import fragmentShader from '../shaders/star.frag';
  * camera so it never runs out. One LineSegments draw call — basically free.
  */
 export default class Starfield {
-  constructor(scene, { count = 1000, radius = 150, color = '#b9c2d8' } = {}) {
+  constructor(scene, { count = 700, radius = 150, color = '#b9c2d8' } = {}) {
     const positions = new Float32Array(count * 2 * 3);
     const sides = new Float32Array(count * 2);
     const twinkle = new Float32Array(count * 2);
