@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNTOLD — Tickets</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__overlay"></div>
+    <div class="hero__content">
+      <p class="hero__eyebrow">Frozen in time · 2026</p>
+      <h1 class="hero__title">UNTOLD</h1>
+      <p class="hero__subtitle">An immersive night carved from ice and light.</p>
+      <button class="btn btn--primary" id="openTickets">Get Tickets</button>
+    </div>
+  </header>
+
+  <!-- Tickets Popup -->
+  <div class="modal" id="ticketsModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="ticketsTitle">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__dialog" role="document">
+      <button class="modal__close" data-close aria-label="Close">&times;</button>
+      <h2 class="modal__title" id="ticketsTitle">Select Tickets</h2>
+      <p class="modal__sub">UNTOLD · Sat, Dec 5 · Doors 8:00 PM</p>
+
+      <ul class="tiers" id="tiers"></ul>
+
+      <div class="modal__footer">
+        <div class="total">
+          <span class="total__label">Total</span>
+          <span class="total__amount" id="totalAmount">$0</span>
+        </div>
+        <button class="btn btn--primary" id="checkoutBtn" disabled>Checkout</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="tickets.js"></script>
+</body>
+</html>
